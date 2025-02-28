@@ -11,6 +11,7 @@ Environment Variables Required:
 """
 
 def main(context):
+    print("kachow")
     # Get the OpenAI API key from environment variables
     api_key = os.environ.get('OPENAI_API_KEY')
     
@@ -20,7 +21,7 @@ def main(context):
             'success': False,
             'message': 'OpenAI API key not found in environment variables'
         }
-    
+      print("api key!")
     # Initialize the OpenAI client
     client = OpenAI(api_key=api_key)
     
