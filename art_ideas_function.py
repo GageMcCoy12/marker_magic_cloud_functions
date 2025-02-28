@@ -21,7 +21,7 @@ def main(context):
             'success': False,
             'message': 'OpenAI API key not found in environment variables'
         }
-      print("api key!")
+    print("api key!")
     # Initialize the OpenAI client
     client = OpenAI(api_key=api_key)
     
