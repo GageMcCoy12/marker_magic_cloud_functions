@@ -44,7 +44,7 @@ def main(context):
     try:
         # Call the OpenAI API
         response = client.chat.completions.create(
-            model="gpt-4-turbo",  # You can change this to a different model if needed
+            model="gpt-4o-mini",  # You can change this to a different model if needed
             response_format={"type": "json_object"},
             messages=[
                 {"role": "system", "content": "You are a creative art assistant that provides ideas for marker art projects."},
