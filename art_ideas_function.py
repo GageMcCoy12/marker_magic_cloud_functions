@@ -15,6 +15,7 @@ def main(context):
     api_key = os.environ.get('OPENAI_API_KEY')
     
     if not api_key:
+        print("ERROR: OpenAI API key not found in environment variables")
         return {
             'success': False,
             'message': 'OpenAI API key not found in environment variables'
@@ -44,7 +45,7 @@ def main(context):
     try:
         # Call the OpenAI API
         response = client.chat.completions.create(
-            model="gpt-4o-mini",  # You can change this to a different model if needed
+            model="4o-mini",  # using the 4o-mini model as specified
             response_format={"type": "json_object"},
             messages=[
                 {"role": "system", "content": "You are a creative art assistant that provides ideas for marker art projects."},
@@ -57,13 +58,20 @@ def main(context):
         content = response.choices[0].message.content
         art_ideas = json.loads(content)
         
+        # Log the art ideas for debugging
+        print("Art ideas generated successfully:")
+        print(art_ideas)
+        
         return {
             'success': True,
             'art_ideas': art_ideas
         }
         
     except Exception as e:
+        # Log the error details
+        print("Error generating art ideas:")
+        print(e)
         return {
             'success': False,
             'message': f'Error generating art ideas: {str(e)}'
-        } 
+        }
