@@ -4,13 +4,13 @@ import base64
 import requests
 from typing import Dict, Any
 
-# Stability AI API configuration
+# DreamStudio API configuration
 STABILITY_API_KEY = os.environ.get("STABILITY_API_KEY")
 STABILITY_API_URL = "https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image"
 
 def main(context: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Generate an image using Stability AI based on a prompt
+    Generate an image using DreamStudio API based on a prompt
     
     Args:
         context: The Appwrite function context containing the request data
@@ -33,27 +33,31 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
         if not STABILITY_API_KEY:
             return {
                 "success": False,
-                "message": "Stability AI API key not configured"
+                "message": "DreamStudio API key not configured"
             }
         
-        # Call Stability AI API
+        # Call DreamStudio API
         headers = {
             "Content-Type": "application/json",
             "Accept": "application/json",
             "Authorization": f"Bearer {STABILITY_API_KEY}"
         }
         
+        # Default parameters based on documentation
         payload = {
             "text_prompts": [
                 {
-                    "text": prompt
+                    "text": prompt,
+                    "weight": 1.0
                 }
             ],
-            "cfg_scale": 7,
+            "cfg_scale": 7,  # How strictly the diffusion process adheres to the prompt text (higher = more strict)
             "height": 1024,
             "width": 1024,
-            "samples": 1,
-            "steps": 30
+            "samples": 1,    # Number of images to generate
+            "steps": 30,     # Number of diffusion steps to run
+            "style_preset": "digital-art",  # Optional style preset
+            "seed": 0        # Random noise seed (0 = random)
         }
         
         response = requests.post(
