@@ -28,6 +28,18 @@ def main(context):
     request_data = context.req.body
     print(f"Request data: {request_data}")
     
+    # Parse the JSON string if it's a string
+    if isinstance(request_data, str):
+        try:
+            request_data = json.loads(request_data)
+            print(f"Parsed request data: {request_data}")
+        except json.JSONDecodeError as e:
+            print(f"Error parsing JSON: {e}")
+            return {
+                'success': False,
+                'message': f'Error parsing JSON request: {str(e)}'
+            }
+
     # Extract color names from the request
     color_names = request_data.get('colorNames', [])
     
@@ -88,4 +100,4 @@ def main(context):
         return {
             'success': False,
             'message': f'Error generating art ideas: {str(e)}'
-        }
+        } 
