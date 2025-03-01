@@ -55,22 +55,22 @@ def main(context):
     
     # Create the prompt for OpenAI
     prompt = f"""
-    I have markers in these colors: {', '.join(color_names)}. 
+        I have markers in these colors: {', '.join(color_names)}.
     
-    Please generate 10 creative art ideas that would work well with only these colors.
-    For each idea, provide:
-    1. A title
-    2. A brief description (1-2 sentences)
-    3. A difficulty rating (Easy, Medium, Hard)
-    4. How the specific colors could be used effectively
+        Please generate 10 creative art ideas that work well using only these colors. For each idea, provide:
+        1. A title.
+        2. A brief description (1-2 sentences) that outlines the concept and includes clear, specific visual instructions for image generation. The description should mention the desired artistic style (e.g., "hyper-realistic watercolor" or "vibrant digital illustration"), lighting, perspective, and composition details.
+        3. A difficulty rating (Easy, Medium, Hard). (Note: higher difficulty means more colors may be used, with a minimum of 3 and a maximum of 10.)
+        4. How the specific colors could be used effectively, emphasizing a harmonious visual appearance.
+        
+        Constraints:
+        - Only suggest projects where the colors work together in one of these harmonies: Monochromatic, Analogous, Complementary, Split Complementary, Triadic, Tetradic, or Square.
+        - Do not suggest projects with a monochromatic color scheme if the color is a neutral color. (specifically browns, blacks, whites, and grays) 
+        - Do not suggest abstract art ideas or patterns.
+        - The visual instructions in the description must be detailed and unambiguous, suitable for direct use with an AI image generation model like Stability.ai.
+        
+        Return the response as a JSON array with objects containing the keys: title, description, difficulty, and colorUsage.
 
-    Only put colors that would work together in the same project. (i.e. Monochromatic, Analogous, Complementary, Split Complementary, Triadic, Tetradic (Double-Complementary), and Square)
-    The higher the difficulty the more colors you are allowed to use. The minimum is 3. The maximum is 10. 
-
-    Never suggest an abstract art idea. Never suggest a pattern
-    
-    Return the response as a JSON array with objects containing fields: 
-    title, description, difficulty, and colorUsage.
     """
     
     try:
