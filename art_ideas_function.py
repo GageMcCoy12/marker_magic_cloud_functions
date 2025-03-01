@@ -63,7 +63,8 @@ def main(context):
     2. A brief description (1-2 sentences)
     3. A difficulty rating (Easy, Medium, Hard)
     4. How the specific colors could be used effectively
-    
+
+    Only put colors that would work together in the same project. (i.e. Monochromatic, Analogous, Complementary, Split Complementary, Triadic, Tetradic (Double-Complementary), and Square)
     The higher the difficulty the more colors you are allowed to use. The minimum is 3. The maximum is 10. 
 
     Return the response as a JSON array with objects containing fields: 
