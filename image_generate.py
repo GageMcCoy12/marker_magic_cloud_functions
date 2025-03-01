@@ -21,12 +21,24 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
     # Get the prompt from the request data
     print("\nTrying to do the AI Generation.\n")
     try:
-        print("working on getting context first")
-        data = context.get('req', {}).get('body', {}).get('data', {})
-        print("WOW Now time for prompt:")
-        prompt = data.get('prompt')
-        print("Prompt: ")
-        print(prompt)
+        print("Working on getting context first")
+        # Get the raw body string from the request
+        body_str = context.get('req', {}).get('body', '')
+        print(f"Raw body: {body_str}")
+        
+        # Parse the JSON string
+        try:
+            # Try to parse the body as JSON
+            body_data = json.loads(body_str)
+            prompt = body_data.get('prompt')
+        except json.JSONDecodeError:
+            print("Failed to parse body as JSON, trying to access directly")
+            # If that fails, try to access the data directly (in case it's already parsed)
+            data = context.get('req', {}).get('body', {})
+            prompt = data.get('prompt')
+        
+        print(f"Prompt: {prompt}")
+        
         if not prompt:
             return {
                 "success": False,
@@ -90,11 +102,16 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
         # Get the base64-encoded image
         base64_image = response_json["artifacts"][0]["base64"]
         
-        # Return the base64-encoded image
-        return base64_image
+        # Return the base64-encoded image wrapped in a consistent JSON structure
+        return {
+            "success": True,
+            "image": base64_image
+        }
         
     except Exception as e:
-        print("oops! something went wrong.")
+        print(f"oops! something went wrong: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return {
             "success": False,
             "message": f"Error generating image: {str(e)}"
