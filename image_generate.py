@@ -8,7 +8,7 @@ from typing import Dict, Any
 STABILITY_API_KEY = os.environ.get("STABILITY_API_KEY")
 STABILITY_API_URL = "https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image"
 
-def main(context: Dict[str, Any]) -> Dict[str, Any]:
+def main(context):
     """
     Generate an image using DreamStudio API based on a prompt
     
@@ -22,20 +22,33 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
     print("\nTrying to do the AI Generation.\n")
     try:
         print("Working on getting context first")
-        # Get the raw body string from the request
-        body_str = context.get('req', {}).get('body', '')
+        # Print context details for debugging
+        print(f"Context type: {type(context)}")
+        print(f"Context dir: {dir(context)}")
+        
+        # Access the request body from the context
+        # In Appwrite functions, the context has a req property with the request data
+        print(f"Request object: {context.req}")
+        print(f"Request dir: {dir(context.req)}")
+        
+        body_str = context.req.body
         print(f"Raw body: {body_str}")
+        print(f"Body type: {type(body_str)}")
         
         # Parse the JSON string
         try:
             # Try to parse the body as JSON
             body_data = json.loads(body_str)
             prompt = body_data.get('prompt')
-        except json.JSONDecodeError:
+            print(f"Parsed JSON: {body_data}")
+        except (json.JSONDecodeError, TypeError):
             print("Failed to parse body as JSON, trying to access directly")
-            # If that fails, try to access the data directly (in case it's already parsed)
-            data = context.get('req', {}).get('body', {})
-            prompt = data.get('prompt')
+            # If the body is already a dict or parsing fails
+            if isinstance(body_str, dict):
+                prompt = body_str.get('prompt')
+            else:
+                prompt = None
+                print(f"Could not extract prompt. Body type: {type(body_str)}")
         
         print(f"Prompt: {prompt}")
         
@@ -47,10 +60,13 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
         
         # Check if API key is available
         if not STABILITY_API_KEY:
+            print("STABILITY_API_KEY not found in environment variables")
             return {
                 "success": False,
                 "message": "DreamStudio API key not configured"
             }
+        else:
+            print("STABILITY_API_KEY found (not showing for security)")
                 
 
         # Call DreamStudio API
@@ -77,30 +93,41 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
             "seed": 0        # Random noise seed (0 = random)
         }
         
+        print(f"Sending request to Stability API with payload: {json.dumps(payload)}")
+        
         response = requests.post(
             STABILITY_API_URL,
             headers=headers,
             json=payload
         )
 
-        print("YAY AN IMAGE")
-
+        print(f"Response status code: {response.status_code}")
+        
         if response.status_code != 200:
+            error_message = f"API request failed with status code {response.status_code}: {response.text}"
+            print(error_message)
             return {
                 "success": False,
-                "message": f"API request failed with status code {response.status_code}: {response.text}"
+                "message": error_message
             }
+        
+        print("YAY AN IMAGE")
         
         # Extract the image from the response
         response_json = response.json()
+        print(f"Response keys: {response_json.keys()}")
+        
         if "artifacts" not in response_json or not response_json["artifacts"]:
+            error_message = "No image generated in the response"
+            print(error_message)
             return {
                 "success": False,
-                "message": "No image generated in the response"
+                "message": error_message
             }
         
         # Get the base64-encoded image
         base64_image = response_json["artifacts"][0]["base64"]
+        print(f"Got base64 image of length: {len(base64_image)}")
         
         # Return the base64-encoded image wrapped in a consistent JSON structure
         return {
