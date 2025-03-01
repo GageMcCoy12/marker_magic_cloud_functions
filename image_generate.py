@@ -130,10 +130,11 @@ def main(context):
         print(f"Got base64 image of length: {len(base64_image)}")
         
         # Return the base64-encoded image wrapped in a consistent JSON structure
-        return {
+        # Use context.res.json() like in the art_ideas function
+        return context.res.json({
             "success": True,
             "image": base64_image
-        }
+        })
         
     except Exception as e:
         print(f"oops! something went wrong: {str(e)}")
