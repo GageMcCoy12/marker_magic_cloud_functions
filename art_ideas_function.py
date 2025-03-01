@@ -3,7 +3,7 @@ import json
 from openai import OpenAI
 
 """
-Appwrite Function to generate art ideas based on specific colors (green, blue, and brown)
+Appwrite Function to generate art ideas based on colors provided in the request
 using OpenAI's API. This keeps the API key secure by storing it in Appwrite's environment variables.
 
 Environment Variables Required:
@@ -21,16 +21,29 @@ def main(context):
             'success': False,
             'message': 'OpenAI API key not found in environment variables'
         }
+    
     print("api key!")
+    
+    # Get the request data
+    request_data = context.req.body
+    print(f"Request data: {request_data}")
+    
+    # Extract color names from the request
+    color_names = request_data.get('colorNames', [])
+    
+    # If no colors are provided, use default colors
+    if not color_names or len(color_names) == 0:
+        color_names = ["green", "blue", "brown"]
+        print(f"No colors provided, using defaults: {color_names}")
+    else:
+        print(f"Using colors from request: {color_names}")
+    
     # Initialize the OpenAI client
     client = OpenAI(api_key=api_key)
     
-    # Define the available colors
-    colors = ["green", "blue", "brown"]
-    
     # Create the prompt for OpenAI
     prompt = f"""
-    I have markers in these colors: {', '.join(colors)}. 
+    I have markers in these colors: {', '.join(color_names)}. 
     
     Please generate 10 creative art ideas that would work well with only these colors.
     For each idea, provide:
@@ -65,7 +78,7 @@ def main(context):
         
         return {
             'success': True,
-            'art_ideas': art_ideas
+            'art_projects': art_ideas.get('art_projects', [])
         }
         
     except Exception as e:
