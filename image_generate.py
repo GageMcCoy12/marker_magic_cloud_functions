@@ -19,10 +19,12 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
         A dictionary with the base64-encoded image or an error message
     """
     # Get the prompt from the request data
+    print("Trying to do the AI Generation.")
     try:
         data = context.get('req', {}).get('body', {}).get('data', {})
         prompt = data.get('prompt')
-        
+        print("Prompt: ")
+        print(prompt)
         if not prompt:
             return {
                 "success": False,
@@ -35,7 +37,8 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
                 "success": False,
                 "message": "DreamStudio API key not configured"
             }
-        
+                
+
         # Call DreamStudio API
         headers = {
             "Content-Type": "application/json",
@@ -65,7 +68,9 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
             headers=headers,
             json=payload
         )
-        
+
+        print("YAY AN IMAGE")
+
         if response.status_code != 200:
             return {
                 "success": False,
@@ -87,6 +92,7 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
         return base64_image
         
     except Exception as e:
+        print("oops! something went wrong.")
         return {
             "success": False,
             "message": f"Error generating image: {str(e)}"
