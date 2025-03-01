@@ -40,8 +40,6 @@ def main(context):
     # If no colors are provided, use default colors
     if not color_names or len(color_names) == 0:
         color_names = ["green", "blue", "brown"]
-    else:
-        print(f"Using colors from request: {color_names}")
     
     # Initialize the OpenAI client
     client = OpenAI(api_key=api_key)
