@@ -67,6 +67,8 @@ def main(context):
     Only put colors that would work together in the same project. (i.e. Monochromatic, Analogous, Complementary, Split Complementary, Triadic, Tetradic (Double-Complementary), and Square)
     The higher the difficulty the more colors you are allowed to use. The minimum is 3. The maximum is 10. 
 
+    Never suggest an abstract art idea. Never suggest a pattern
+    
     Return the response as a JSON array with objects containing fields: 
     title, description, difficulty, and colorUsage.
     """
