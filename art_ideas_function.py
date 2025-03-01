@@ -11,24 +11,30 @@ Environment Variables Required:
 """
 
 def main(context):
+    print("kachow")
     # Get the OpenAI API key from environment variables
     api_key = os.environ.get('OPENAI_API_KEY')
     
     if not api_key:
+        print("ERROR: OpenAI API key not found in environment variables")
         return {
             'success': False,
             'message': 'OpenAI API key not found in environment variables'
         }
     
+    print("api key!")
     
     # Get the request data
     request_data = context.req.body
+    print(f"Request data: {request_data}")
     
     # Parse the JSON string if it's a string
     if isinstance(request_data, str):
         try:
             request_data = json.loads(request_data)
+            print(f"Parsed request data: {request_data}")
         except json.JSONDecodeError as e:
+            print(f"Error parsing JSON: {e}")
             return {
                 'success': False,
                 'message': f'Error parsing JSON request: {str(e)}'
@@ -40,6 +46,9 @@ def main(context):
     # If no colors are provided, use default colors
     if not color_names or len(color_names) == 0:
         color_names = ["green", "blue", "brown"]
+        print(f"No colors provided, using defaults: {color_names}")
+    else:
+        print(f"Using colors from request: {color_names}")
     
     # Initialize the OpenAI client
     client = OpenAI(api_key=api_key)
@@ -76,15 +85,24 @@ def main(context):
         art_ideas = json.loads(content)
         
         # Log the art ideas for debugging
-        context.log(art_ideas)
+        print("Art ideas generated successfully:")
+        print(art_ideas)
         
-        return {
-            'success': True,
-            'art_projects': art_ideas.get('art_projects', [])
-        }
+        # Format the response for Appwrite
+        # Appwrite expects a dictionary that will be converted to JSON
+        response_data = {}
+        if 'art_projects' in art_ideas:
+            response_data['art_projects'] = art_ideas['art_projects']
+        else:
+            response_data['art_projects'] = art_ideas
+        
+        # Return a properly formatted response that Appwrite can handle
+        return context.res.json(response_data)
         
     except Exception as e:
         # Log the error details
+        print("Error generating art ideas:")
+        print(e)
         return {
             'success': False,
             'message': f'Error generating art ideas: {str(e)}'
