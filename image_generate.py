@@ -19,7 +19,7 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
         A dictionary with the base64-encoded image or an error message
     """
     # Get the prompt from the request data
-    print("Trying to do the AI Generation.\n")
+    print("\nTrying to do the AI Generation.\n")
     try:
         print("working on getting context first")
         data = context.get('req', {}).get('body', {}).get('data', {})
