@@ -64,6 +64,8 @@ def main(context):
     3. A difficulty rating (Easy, Medium, Hard)
     4. How the specific colors could be used effectively
     
+    The higher the difficulty the more colors you are allowed to use. The minimum is 3. The maximum is 10. 
+
     Return the response as a JSON array with objects containing fields: 
     title, description, difficulty, and colorUsage.
     """
