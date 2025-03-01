@@ -2,6 +2,7 @@ import os
 import json
 import base64
 import requests
+import traceback
 from typing import Dict, Any
 
 # DreamStudio API configuration
@@ -18,13 +19,16 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
     Returns:
         A dictionary with the base64-encoded image or an error message
     """
-    # Get the prompt from the request data
-    print("Trying to do the AI Generation.")
     try:
+        # Log the incoming context for debugging
+        print(f"Received context: {json.dumps(context)}")
+        
+        # Get the prompt from the request data
         data = context.get('req', {}).get('body', {}).get('data', {})
         prompt = data.get('prompt')
-        print("Prompt: ")
-        print(prompt)
+        
+        print(f"Extracted prompt: {prompt}")
+        
         if not prompt:
             return {
                 "success": False,
@@ -37,8 +41,9 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
                 "success": False,
                 "message": "DreamStudio API key not configured"
             }
-                
-
+        
+        print(f"API Key available: {bool(STABILITY_API_KEY)}")
+        
         # Call DreamStudio API
         headers = {
             "Content-Type": "application/json",
@@ -54,31 +59,43 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
                     "weight": 1.0
                 }
             ],
-            "cfg_scale": 7,  # How strictly the diffusion process adheres to the prompt text (higher = more strict)
+            "cfg_scale": 7,
             "height": 1024,
             "width": 1024,
-            "samples": 1,    # Number of images to generate
-            "steps": 30,     # Number of diffusion steps to run
-            "style_preset": "digital-art",  # Optional style preset
-            "seed": 0        # Random noise seed (0 = random)
+            "samples": 1,
+            "steps": 30,
+            "style_preset": "digital-art",
+            "seed": 0
         }
+        
+        print(f"Sending request to {STABILITY_API_URL}")
         
         response = requests.post(
             STABILITY_API_URL,
             headers=headers,
             json=payload
         )
-
-        print("YAY AN IMAGE")
-
+        
+        print(f"Received response with status code: {response.status_code}")
+        
         if response.status_code != 200:
+            error_message = f"API request failed with status code {response.status_code}"
+            try:
+                error_details = response.json()
+                error_message += f": {json.dumps(error_details)}"
+            except:
+                error_message += f": {response.text}"
+            
+            print(error_message)
             return {
                 "success": False,
-                "message": f"API request failed with status code {response.status_code}: {response.text}"
+                "message": error_message
             }
         
         # Extract the image from the response
         response_json = response.json()
+        print(f"Response keys: {list(response_json.keys())}")
+        
         if "artifacts" not in response_json or not response_json["artifacts"]:
             return {
                 "success": False,
@@ -87,13 +104,16 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
         
         # Get the base64-encoded image
         base64_image = response_json["artifacts"][0]["base64"]
+        print("Successfully extracted base64 image")
         
         # Return the base64-encoded image
         return base64_image
         
     except Exception as e:
-        print("oops! something went wrong.")
+        error_traceback = traceback.format_exc()
+        error_message = f"Error generating image: {str(e)}\n{error_traceback}"
+        print(error_message)
         return {
             "success": False,
-            "message": f"Error generating image: {str(e)}"
+            "message": error_message
         }
