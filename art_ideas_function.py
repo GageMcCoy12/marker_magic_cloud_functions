@@ -76,7 +76,7 @@ def main(context):
         art_ideas = json.loads(content)
         
         # Log the art ideas for debugging
-        print(art_ideas)
+        context.log(art_ideas)
         
         return {
             'success': True,
