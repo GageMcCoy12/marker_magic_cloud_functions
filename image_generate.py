@@ -9,7 +9,7 @@ from typing import Dict, Any
 STABILITY_API_KEY = os.environ.get("STABILITY_API_KEY")
 STABILITY_API_URL = "https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image"
 
-def main(context: Dict[str, Any]) -> Dict[str, Any]:
+def main(context):
     """
     Generate an image using DreamStudio API based on a prompt
     
@@ -20,14 +20,16 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
         A dictionary with the base64-encoded image or an error message
     """
     try:
-        # Log the incoming context for debugging
-        print(f"Received context: {json.dumps(context)}")
+        # Use context.log instead of print for better logging
+        context.log("Function started")
         
         # Get the prompt from the request data
-        data = context.get('req', {}).get('body', {}).get('data', {})
-        prompt = data.get('prompt')
+        # In Appwrite, the request body is available at context.req.body
+        body = context.req.body if hasattr(context, 'req') and hasattr(context.req, 'body') else {}
+        data = body.get('data', {}) if isinstance(body, dict) else {}
+        prompt = data.get('prompt') if isinstance(data, dict) else None
         
-        print(f"Extracted prompt: {prompt}")
+        context.log(f"Extracted prompt: {prompt}")
         
         if not prompt:
             return {
@@ -42,7 +44,7 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
                 "message": "DreamStudio API key not configured"
             }
         
-        print(f"API Key available: {bool(STABILITY_API_KEY)}")
+        context.log(f"API Key available: {bool(STABILITY_API_KEY)}")
         
         # Call DreamStudio API
         headers = {
@@ -68,7 +70,7 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
             "seed": 0
         }
         
-        print(f"Sending request to {STABILITY_API_URL}")
+        context.log(f"Sending request to {STABILITY_API_URL}")
         
         response = requests.post(
             STABILITY_API_URL,
@@ -76,7 +78,7 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
             json=payload
         )
         
-        print(f"Received response with status code: {response.status_code}")
+        context.log(f"Received response with status code: {response.status_code}")
         
         if response.status_code != 200:
             error_message = f"API request failed with status code {response.status_code}"
@@ -86,7 +88,7 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
             except:
                 error_message += f": {response.text}"
             
-            print(error_message)
+            context.error(error_message)
             return {
                 "success": False,
                 "message": error_message
@@ -94,7 +96,7 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
         
         # Extract the image from the response
         response_json = response.json()
-        print(f"Response keys: {list(response_json.keys())}")
+        context.log(f"Response keys: {list(response_json.keys())}")
         
         if "artifacts" not in response_json or not response_json["artifacts"]:
             return {
@@ -104,15 +106,15 @@ def main(context: Dict[str, Any]) -> Dict[str, Any]:
         
         # Get the base64-encoded image
         base64_image = response_json["artifacts"][0]["base64"]
-        print("Successfully extracted base64 image")
+        context.log("Successfully extracted base64 image")
         
         # Return the base64-encoded image
         return base64_image
         
     except Exception as e:
         error_traceback = traceback.format_exc()
-        error_message = f"Error generating image: {str(e)}\n{error_traceback}"
-        print(error_message)
+        error_message = f"Error generating image: {str(e)}"
+        context.error(f"{error_message}\n{error_traceback}")
         return {
             "success": False,
             "message": error_message
